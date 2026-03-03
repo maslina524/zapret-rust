@@ -1,0 +1,20 @@
+[package]
+name = "zapret-rust"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sysinfo = "0.38.3"
+winapi = { version = "0.3", features = [
+    "securitybaseapi",
+    "winnt",
+    "processthreadsapi",
+    "minwindef",
+    "handleapi",
+    "shellapi",
+    "objbase",
+    "winuser",
+    "impl-default"
+] }
+windows-service = "0.8.0"
+winreg = "0.55.0"
