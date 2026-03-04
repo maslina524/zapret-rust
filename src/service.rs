@@ -10,7 +10,7 @@ use crate::bat;
 
 const RUST_ZAPRET_VER: &str = "0.1.0";
 const ZAPRET_VER: &str = "1.9.6";
-const REPO_URL: &str = "https://www.google.com";
+const REPO_URL: &str = "https://github.com/maslina524/zapret-rust";
 const ZAPRET_URL: &str = "https://github.com/Flowseal/zapret-discord-youtube";
 const SRVCNAME: &str = "zapret-rust";
 const GAME_FILTER_MN: u8 = 12; // only for test
