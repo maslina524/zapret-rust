@@ -32,7 +32,7 @@ lazy_static! {
         match env::current_exe() {
             Ok(exe_path) => {
                 if let Some(exe_dir) = exe_path.parent() {
-                    exe_dir.to_string_lossy().to_string()
+                    format!(r"{}\", exe_dir.to_string_lossy().to_string())
                 } else {
                     bat::pause();
                     String::from("Error!")
@@ -236,6 +236,7 @@ pub fn service_install() {
         Ok(entries) => entries,
         Err(e) => {
             eprintln!("Failed to read directory ({})", e);
+            eprintln!("{}", &CONFIGS_PATH.to_string());
             bat::pause();
             return;
         }
