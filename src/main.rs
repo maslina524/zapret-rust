@@ -13,7 +13,9 @@ use winapi::um::winnt::{HANDLE, TOKEN_QUERY, TOKEN_ELEVATION, TokenElevation};
 use winapi::um::winuser::SW_SHOWDEFAULT;
 
 mod service;
-pub use service::menu;
+use service::{menu, install_selected_file, service_install, service_remove, service_status};
+
+use crate::service::add_domain;
 
 mod bat;
 
@@ -80,5 +82,28 @@ fn main() {
         }
     }
 
-    menu();
+    let argv: Vec<String> = env::args().collect();
+    if argv.len() > 1 {
+        match argv[1].as_str() {
+            "install" => {
+                if argv.len() > 2 {
+                    install_selected_file(&argv[2]);
+                } else {
+                    service_install();
+                }
+            },
+            "remove" => service_remove(),
+            "status" => service_status(),
+            "add" => {
+                if argv.len() > 2 {
+                    add_domain(Some(argv[2].clone()));
+                } else {
+                    add_domain(None);
+                }
+            }
+            _ => menu(),
+        }
+    } else {
+        menu();
+    }
 }
