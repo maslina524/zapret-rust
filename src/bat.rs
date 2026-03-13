@@ -130,10 +130,9 @@ pub fn get_service_status(service_name: &str) -> Result<Option<ServiceState>, wi
 }
 
 pub fn kill_winws() {
-    Command::new("taskkill")
-        .args(&["/F", "/IM", "winws.exe"])
-        .status()
-        .unwrap();
+    if let Err(e) = Command::new("taskkill").args(&["/F", "/IM", "winws.exe"]).status() {
+        eprintln!("Failed to kill winws.exe: {}", e);
+    }
 }
 
 // BAT COMMANDS

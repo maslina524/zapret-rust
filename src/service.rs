@@ -17,7 +17,7 @@ use std::os::windows::ffi::OsStrExt;
 
 use crate::bat;
 
-const RUST_ZAPRET_VER: &str = "0.1.1";
+const RUST_ZAPRET_VER: &str = "0.1.2";
 const ZAPRET_VER: &str = "1.9.6";
 const REPO_URL: &str = "https://github.com/maslina524/zapret-rust";
 const ZAPRET_URL: &str = "https://github.com/Flowseal/zapret-discord-youtube";
@@ -27,23 +27,23 @@ const GAME_FILTER_MN: u8 = 12; // only for test
 const PATH_SEP: &str = if cfg!(windows) { ";" } else { ":" };
 
 lazy_static! {
-    // static ref ABSOLUTE_PATH: String = String::from(r"C:\Users\lukki\Documents\zapret-rust\");
-    static ref ABSOLUTE_PATH: String = {
-        match env::current_exe() {
-            Ok(exe_path) => {
-                if let Some(exe_dir) = exe_path.parent() {
-                    format!(r"{}\", exe_dir.to_string_lossy().to_string())
-                } else {
-                    bat::pause();
-                    String::from("Error!")
-                }
-            }
-            Err(e) => {
-                bat::pause();
-                format!("Error: {e}")
-            }
-        }
-    };
+    static ref ABSOLUTE_PATH: String = String::from(r"C:\Users\lukki\Documents\zapret-rust\");
+    // static ref ABSOLUTE_PATH: String = {
+    //     match env::current_exe() {
+    //         Ok(exe_path) => {
+    //             if let Some(exe_dir) = exe_path.parent() {
+    //                 format!(r"{}\", exe_dir.to_string_lossy().to_string())
+    //             } else {
+    //                 bat::pause();
+    //                 String::from("Error!")
+    //             }
+    //         }
+    //         Err(e) => {
+    //             bat::pause();
+    //             format!("Error: {e}")
+    //         }
+    //     }
+    // };
     static ref CONFIGS_PATH: String = format!("{}configs\\", ABSOLUTE_PATH.to_string());
     static ref BIN_PATH: String = format!("{}bin\\", ABSOLUTE_PATH.to_string());
     static ref LISTS_PATH: String = format!("{}lists\\", ABSOLUTE_PATH.to_string());
@@ -287,8 +287,17 @@ pub fn service_install() {
     install_selected_file(selected_file);
 }
 
+fn remove_outer_quotes(arg: &str) -> String { // AI code lol.
+    if let Some(eq_pos) = arg.find('=') {
+        let (key, value) = arg.split_at(eq_pos + 1);
+        if value.starts_with('"') && value.ends_with('"') && value.len() >= 2 {
+            return format!("{}{}", key, &value[1..value.len()-1]);
+        }
+    }
+    arg.to_string()
+}
+
 pub fn install_selected_file(selected_file: &str) {
-    // println!("{selected_file}");
     // We process the selected file and get a command ready for execution.
     let config_data: String;
     if let Ok(c) = fs::read_to_string(format!("{}{}", &CONFIGS_PATH.to_string(), selected_file)) {
@@ -315,11 +324,30 @@ pub fn install_selected_file(selected_file: &str) {
         eprintln!("Couldn't delete the service: {e}")
     }
 
-    let mut args: Vec<String> = replace_placeholders(config_data).split(" --").map(str::to_string).collect();
-    for (i, arg) in args.clone().iter().enumerate() {
-        if i != 0 {
-            args.insert(i, format!("--{arg}"))
+    let binding = replace_placeholders(config_data);
+    let binding = binding.replace("\r\n", " ").replace("\n", " ").replace("\r", " ");
+    
+    let parts: Vec<&str> = binding.split(" --").collect();
+    let mut args = Vec::new();
+    
+    for (i, part) in parts.into_iter().enumerate() {
+        let part = part.trim();
+        if part.is_empty() {
+            continue;
         }
+        let arg = if i == 0 {
+            if part.starts_with("--") {
+                part.to_string()
+            } else {
+                format!("--{}", part)
+            }
+        } else {
+            format!("--{}", part)
+        };
+        // --hostlist="C:\path" -> --hostlist=C:\path
+        let arg = remove_outer_quotes(&arg);
+        
+        args.push(arg);
     }
 
     let exe_path = format!("{}winws.exe", BIN_PATH.to_string());
