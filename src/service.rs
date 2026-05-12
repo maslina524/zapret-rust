@@ -27,23 +27,22 @@ const GAME_FILTER_MN: u8 = 12; // only for test
 const PATH_SEP: &str = if cfg!(windows) { ";" } else { ":" };
 
 lazy_static! {
-    static ref ABSOLUTE_PATH: String = String::from(r"C:\Users\lukki\Documents\zapret-rust\");
-    // static ref ABSOLUTE_PATH: String = {
-    //     match env::current_exe() {
-    //         Ok(exe_path) => {
-    //             if let Some(exe_dir) = exe_path.parent() {
-    //                 format!(r"{}\", exe_dir.to_string_lossy().to_string())
-    //             } else {
-    //                 bat::pause();
-    //                 String::from("Error!")
-    //             }
-    //         }
-    //         Err(e) => {
-    //             bat::pause();
-    //             format!("Error: {e}")
-    //         }
-    //     }
-    // };
+    static ref ABSOLUTE_PATH: String = {
+        match env::current_exe() {
+            Ok(exe_path) => {
+                if let Some(exe_dir) = exe_path.parent() {
+                    format!(r"{}\", exe_dir.to_string_lossy().to_string())
+                } else {
+                    bat::pause();
+                    String::from("Error!")
+                }
+            }
+            Err(e) => {
+                bat::pause();
+                format!("Error: {e}")
+            }
+        }
+    };
     static ref CONFIGS_PATH: String = format!("{}configs\\", ABSOLUTE_PATH.to_string());
     static ref BIN_PATH: String = format!("{}bin\\", ABSOLUTE_PATH.to_string());
     static ref LISTS_PATH: String = format!("{}lists\\", ABSOLUTE_PATH.to_string());
